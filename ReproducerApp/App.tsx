@@ -15,6 +15,7 @@ import {
   Text,
   useColorScheme,
   View,
+  Alert,
 } from 'react-native';
 
 import {
@@ -55,8 +56,31 @@ function Section({children, title}: SectionProps): React.JSX.Element {
   );
 }
 
+const enableRemoteDebugging = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      const NativeDevSettings =
+        require('react-native/Libraries/NativeModules/specs/NativeDevSettings').default;
+      NativeDevSettings.setIsDebuggingRemotely(true);
+      resolve(true);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+
+  if (__DEV__) {
+    enableRemoteDebugging()
+      .then(() => {
+        console.log('Remote debugging enabled...');
+      })
+      .catch(err => {
+        Alert.alert('Remote debugging disabled...' + err);
+      });
+  }
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
